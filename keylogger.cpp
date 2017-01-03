@@ -96,12 +96,21 @@ int main() {
         perror("Device error");
         exit(EXIT_FAILURE);
     }
-
+    int longstroke = 0;
     while(read(fd, &ie, sizeof(struct input_event))) {
         printf("time %ld.%06ld\ttype %d\tcode %d\tvalue %d\n", ie.time.tv_sec, ie.time.tv_usec, ie.type, ie.code, ie.value);
         if (ie.type == 1 && ie.value == 1) {
             size = decode(ie.code, stroke);
             if (storeKeyStroke(stroke, size) < 0) {
+                close(fd);
+                exit(EXIT_FAILURE);
+            }
+            longstroke = 0;
+        }
+        else if (ie.type == 1 && ie.value == 0) longstroke = 0;
+        else if (ie.value == 2 && !longstroke) {
+            longstroke = 1;
+            if (storeKeyStroke("/LONG/", 6) < 0) {
                 close(fd);
                 exit(EXIT_FAILURE);
             }
