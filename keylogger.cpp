@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define KEYBOARDFILE "/dev/input/event2"
-#define TIMEOUT 30
+#define TIMEOUT 3600
 
 pthread_mutex_t mut;
 pthread_t th;
