@@ -19,14 +19,17 @@ char stroke[10];
 int size = 0;
 
 void updateFile(int init = 1) {
-    char * last;
+    char last[20];
     if (!init) strcpy(last, FILE_NAME);
     time_t timer = time(NULL);
     pthread_mutex_lock(&mut);
     sprintf(FILE_NAME, "%d", timer);
     pthread_mutex_unlock(&mut);
     if (!init) {
-        // TODO 
+        char cmd[30];
+        sprintf(cmd, "node mail.js %s", last);
+        //printf("%s\n", cmd);
+        system(cmd);
     }
 }
 
