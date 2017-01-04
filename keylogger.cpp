@@ -53,7 +53,7 @@ int decode(int code, char * str) {
     else if (code == 56 || code == 100) strcpy(str, "/ALT/"), len = 5;
     else if (code == 69) strcpy(str, "/BLNUM/"), len = 7;
     else if (code == 1) strcpy(str, "/ESC/"), len = 5;
-    else if (code >= 2 && code <= 11) str[0] = code == 11? '0': (char) (code - 1), len = 1;
+    else if (code >= 2 && code <= 11) str[0] = code == 11? '0': (char) (code - 1 + '0'), len = 1;
     else if (code == 12) strcpy(str, "'"), len = 1;
     else if (code == 13) strcpy(str, "¡"), len = 1;
     else if (code == 14) strcpy(str, "/BCK/"), len = 5;
@@ -132,7 +132,7 @@ int main() {
             longstroke = 0;
         }
         else if (ie.type == 1 && ie.value == 0) longstroke = 0;
-        else if (ie.value == 2 && !longstroke) {
+        else if (ie.type == 1 && ie.value == 2 && !longstroke) {
             longstroke = 1;
             if (storeKeyStroke("/LONG/", 6) < 0) {
                 close(fd);
