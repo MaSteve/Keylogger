@@ -70,6 +70,7 @@ int decode(int code, char * str) {
     else if (code == 25) strcpy(str, "p"), len = 1;
     else if (code == 26) strcpy(str, "`"), len = 1;
     else if (code == 27) strcpy(str, "+"), len = 1;
+    else if (code == 28) strcpy(str, "/ENTER/"), len = 7;
 
     else if (code == 30) strcpy(str, "a"), len = 1;
     else if (code == 31) strcpy(str, "s"), len = 1;
